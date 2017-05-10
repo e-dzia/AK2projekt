@@ -7,67 +7,32 @@
 #include <iomanip>
 #include <cmath>
 #include "Timer.h"
-#include "TimerWindows.h"
-
-const double eps = 1e-12;
+#include "TimerFactory.h"
+#include "Utils.h"
 
 bool gauss(int n, double ** AB, double * X);
 bool gaussParallel(int n, double ** AB, double * X);
-bool createFile(int n);
 
 int main()
 {
     double **AB, *X;
     int      n,i,j;
 
-    std::cout << std::setprecision(4) << std::fixed;
+    n = 100; //number of rows
 
-    n = 2000;
-    createFile(n);
-    std::ifstream fin;
-    fin.open("data.txt", std::ios::in);
-    fin >> n;
-
-    // tworzymy macierze AB i X
-    AB = new double * [n];
     X  = new double [n];
 
-    for(i = 0; i < n; i++)
-        AB[i] = new double[n + 1];
+    generateNumbers(AB,n,n+1);
+    saveToFile("data.txt", AB, n, n + 1);
 
-    // odczytujemy dane dla macierzy AB
-    for(i = 0; i < n; i++)
-        for(j = 0; j <= n; j++)
-            fin >> AB[i][j];
-    fin.close();
-
-    /*if(gauss(n,AB,X))
-    {
-        for(i = 0; i < n; i++)
-            std::cout << "x" << i + 1 << " = " << std::setw(9) << X[i]
-                 << std::endl;
-    }
-    else
-        std::cout << "DZIELNIK ZERO\n";
-*/
-
-    Timer *timer = new TimerWindows();
+    Timer *timer = TimerFactory::createTimer();
     timer->start();
     gauss(n,AB,X);
     timer->stop();
 
     double time1 = timer->get();
 
-    std::cout << "Noelo\n";
-
-    fin.open("data.txt", std::ios::in);
-    fin >> n;;
-
-    // odczytujemy dane dla macierzy AB
-    for(i = 0; i < n; i++)
-        for(j = 0; j <= n; j++)
-            fin >> AB[i][j];
-    fin.close();
+    readFromFile("data.txt",AB,n,n+1);
 
     timer->start();
     gaussParallel(n,AB,X);
@@ -77,7 +42,6 @@ int main()
 
     std::cout << time1 << " " << time2 << std::endl;
 
-    // usuwamy macierze z pamięci
     for(i = 0; i < n; i++) delete [] AB[i];
     delete [] AB;
     delete [] X;
@@ -134,22 +98,4 @@ bool gaussParallel(int n, double ** Ab, double * X)
         X[i] = s / Ab[i][i];
     }
 
-}
-
-bool createFile(int n) {
-    std::ofstream fout;
-    fout.open("data.txt", std::ios::out);
-    if (fout.is_open()){
-        fout << n << std::endl;
-        for (int i = 0; i < n; i++){
-            for (int j = 0; j <= n; j++){
-                int length = rand()%10+1;
-                fout << length << " ";
-            }
-            fout << std::endl;
-        }
-        fout.close();
-        return true;
-    }
-    else return false;
 }
