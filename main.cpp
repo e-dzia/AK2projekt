@@ -1,9 +1,6 @@
-#include <stdio.h>
-#include <sched.h>
 #include <omp.h>
 #include <iostream>
 #include <fstream>
-#include <iostream>
 #include <iomanip>
 #include <cmath>
 #include "Timer.h"
@@ -18,7 +15,7 @@ int main()
     double **AB, *X;
     int      n,i,j;
 
-    n = 100; //number of rows
+    n = 1000; //number of rows
 
     X  = new double [n];
 
@@ -30,7 +27,7 @@ int main()
     gauss(n,AB,X);
     timer->stop();
 
-    double time1 = timer->get();
+    double timeNormal = timer->get();
 
     readFromFile("data.txt",AB,n,n+1);
 
@@ -38,9 +35,9 @@ int main()
     gaussParallel(n,AB,X);
     timer->stop();
 
-    double time2 = timer->get();
+    double timeParallel = timer->get();
 
-    std::cout << time1 << " " << time2 << std::endl;
+    std::cout << "Gauss: " << timeNormal << ", GaussParallel: " << timeParallel << std::endl;
 
     for(i = 0; i < n; i++) delete [] AB[i];
     delete [] AB;

@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Utils.h"
 
 void generateNumbers(double **&arr, const int rows, const int columns) {
