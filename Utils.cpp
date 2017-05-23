@@ -2,24 +2,17 @@
 #include "Utils.h"
 
 void generateNumbers(double **&arr, const int rows, const int columns) {
-    if (arr != nullptr){
-        for (int i = 0; i < rows; i++){
-            if (arr[i] != nullptr)
-                delete[] arr[i];
-        }
-        delete[] arr;
-    }
-
+    int i, j;
+    
     arr = new double * [rows];
-    for(int i = 0; i < rows; i++)
+    for(i = 0; i < rows; ++i)
         arr[i] = new double[columns];
 
-    for (int i = 0; i < rows; ++i){
-        for (int j = 0; j < columns; ++j){
-            arr[i][j] =  double(rand()%100);
+    for (i = 0; i < rows; ++i){
+        for (j = 0; j < columns; ++j){
+            arr[i][j] = double(rand()%100);
         }
     }
-
 }
 
 bool saveToFile(const std::string &filename, const double* const* arr, const int rows, const int columns) {
@@ -38,25 +31,13 @@ bool saveToFile(const std::string &filename, const double* const* arr, const int
 }
 
 bool readFromFile(const std::string &filename, double **&arr, int rows, int columns) {
-    // clear vars
-    if (arr != nullptr){
-        for (int i = 0; i < rows; i++){
-            if (arr[i] != nullptr)
-                delete[] arr[i];
-        }
-        delete[] arr;
-    }
-    arr = new double * [rows];
-    for(int i = 0; i < rows; i++)
-        arr[i] = new double[columns];
-
     // try to load file
     std::ifstream fin;
     fin.open(filename, std::ios::in);
     if (fin.is_open()) {
-        int tmp_val;
-        for (int i = 0; i < rows; i++){
-            for (int j = 0; j < columns; j++){
+        int tmp_val, i, j;
+        for (i = 0; i < rows; ++i){
+            for (j = 0; j < columns; ++j){
                 if (fin >> tmp_val)
                     arr[i][j] = tmp_val;
                 else

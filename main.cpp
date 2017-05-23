@@ -3,52 +3,52 @@
 #include <fstream>
 #include <iomanip>
 #include <cmath>
-#include "Timer.h"
 #include "TimerFactory.h"
 #include "Utils.h"
 
-bool gauss(int n, double ** AB, double * X);
-bool gaussParallel(int n, double ** AB, double * X);
+void gauss(int n, double ** AB, double * X);
+void gaussParallel(int n, double ** AB, double * X);
 
 int main()
 {
-    double **AB, *X;
-    int      n;
+    double **AB = nullptr;
+    double *X = nullptr;
+    double timeNormal, timeParallel;
+    int n, i, j, k;
     int sizes[] = {100,200,500,1000,2000};
     int sizeOfSizes = sizeof(sizes)/sizeof(sizes[0]);
+    Timer *timer = TimerFactory::createTimer();
+
     std::cout << sizeOfSizes << std::endl;
 
-    std::ofstream fout; fout.open("results.txt");
+    std::ofstream fout;
+    fout.open("results.txt");
 
-    for (int i = 0; i < sizeOfSizes; i++){
+    for (i = 0; i < sizeOfSizes; i++) {
         n = sizes[i]; //number of rows
         std::cout << i << " " << n << " " << sizeOfSizes << std::endl;
-        for (int j = 0; j < 10; j++){
+        for (j = 0; j < 10; j++) {
             std::cout << j << std::endl;
-            X  = new double [n];
-            AB = nullptr;
+            X = new double [n];
 
-            generateNumbers(AB,n,n+1);
+            generateNumbers(AB, n, n + 1);
             saveToFile("data.txt", AB, n, n + 1);
 
-            Timer *timer = TimerFactory::createTimer();
             timer->start();
             gauss(n,AB,X);
             timer->stop();
+            timeNormal = timer->getSeconds();
 
-            double timeNormal = timer->get();
-
-            readFromFile("data.txt",AB,n,n+1);
+            readFromFile("data.txt", AB, n, n+1);
 
             timer->start();
             gaussParallel(n,AB,X);
             timer->stop();
-
-            double timeParallel = timer->get();
+            timeParallel = timer->getSeconds();
 
             fout << n << " " << timeNormal << " " << timeParallel << std::endl;
 
-            for(int k = 0; k < n; k++) delete [] AB[k];
+            for(k = 0; k < n; ++k) delete [] AB[k];
             delete [] AB;
             delete [] X;
         }
@@ -57,14 +57,14 @@ int main()
     return 0;
 }
 
-bool gauss(int n, double ** Ab, double * X)
+void gauss(int n, double ** AB, double * X)
 {
     //eliminowanie wspolczynnikow
     for (int i = 0; i < n-1;  i++){
         for (int j = i+1; j < n; j++){
-            double xFac = -Ab[j][i]/Ab[i][i];
+            double xFac = -AB[j][i]/AB[i][i];
             for (int k = i+1; k < n+1; k++){
-                Ab[j][k] += xFac*Ab[i][k];
+                AB[j][k] += xFac*AB[i][k];
             }
         }
     }
@@ -72,38 +72,38 @@ bool gauss(int n, double ** Ab, double * X)
     //wyliczanie X
     for(int i = n - 1; i >= 0; i--)
     {
-        double s = Ab[i][n];
+        double s = AB[i][n];
         for(int j = n - 1; j >= i + 1; j--){
-            s -= Ab[i][j] * X[j];
+            s -= AB[i][j] * X[j];
         }
-        X[i] = s / Ab[i][i];
+        X[i] = s / AB[i][i];
     }
 
 }
 
-bool gaussParallel(int n, double ** Ab, double * X)
+void gaussParallel(int n, double ** AB, double * X)
 {
     int i, j, k;
     //eliminowanie wspolczynnikow
-#pragma omp parallel for private(i,j,k) shared(Ab,n)
+#pragma omp parallel for private(i,j,k) shared(AB,n)
     for (i = 0; i < n-1;  i++){
         for (j = i+1; j < n; j++){
-            double xFac = -Ab[j][i]/Ab[i][i];
+            double xFac = -AB[j][i]/AB[i][i];
             for (k = i+1; k < n+1; k++){
-                Ab[j][k] += xFac*Ab[i][k];
+                AB[j][k] += xFac*AB[i][k];
             }
         }
     }
 
     //wyliczanie X
-#pragma omp parallel for private(i,j) shared(Ab,X,n)
+#pragma omp parallel for private(i,j) shared(AB,X,n)
     for(i = n - 1; i >= 0; i--)
     {
-        double s = Ab[i][n];
+        double s = AB[i][n];
         for(j = n - 1; j >= i + 1; j--){
-            s -= Ab[i][j] * X[j];
+            s -= AB[i][j] * X[j];
         }
-        X[i] = s / Ab[i][i];
+        X[i] = s / AB[i][i];
     }
 
 }
