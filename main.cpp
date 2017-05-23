@@ -13,35 +13,49 @@ bool gaussParallel(int n, double ** AB, double * X);
 int main()
 {
     double **AB, *X;
-    int      n,i,j;
+    int      n;
+    int sizes[] = {100,200,500,1000,2000};
+    int sizeOfSizes = sizeof(sizes)/sizeof(sizes[0]);
+    std::cout << sizeOfSizes << std::endl;
 
-    n = 1000; //number of rows
+    std::ofstream fout; fout.open("results.txt");
 
-    X  = new double [n];
+    for (int i = 0; i < sizeOfSizes; i++){
+        n = sizes[i]; //number of rows
+        std::cout << i << " " << n << " " << sizeOfSizes << std::endl;
+        for (int j = 0; j < 10; j++){
+            std::cout << j << std::endl;
+            X  = new double [n];
+            AB = nullptr;
 
-    generateNumbers(AB,n,n+1);
-    saveToFile("data.txt", AB, n, n + 1);
+            //std::cout << "Noelo" << std::endl;
+            generateNumbers(AB,n,n+1);
+            saveToFile("data.txt", AB, n, n + 1);
 
-    Timer *timer = TimerFactory::createTimer();
-    timer->start();
-    gauss(n,AB,X);
-    timer->stop();
+            //std::cout << "Noelo" << std::endl;
 
-    double timeNormal = timer->get();
+            Timer *timer = TimerFactory::createTimer();
+            timer->start();
+            gauss(n,AB,X);
+            timer->stop();
 
-    readFromFile("data.txt",AB,n,n+1);
+            double timeNormal = timer->get();
 
-    timer->start();
-    gaussParallel(n,AB,X);
-    timer->stop();
+            readFromFile("data.txt",AB,n,n+1);
 
-    double timeParallel = timer->get();
+            timer->start();
+            gaussParallel(n,AB,X);
+            timer->stop();
 
-    std::cout << "Gauss: " << timeNormal << ", GaussParallel: " << timeParallel << std::endl;
+            double timeParallel = timer->get();
 
-    for(i = 0; i < n; i++) delete [] AB[i];
-    delete [] AB;
-    delete [] X;
+            fout << n << " " << timeNormal << " " << timeParallel << std::endl;
+
+            for(int k = 0; k < n; k++) delete [] AB[i];
+            delete [] AB;
+            delete [] X;
+        }
+    }
 
     return 0;
 }
