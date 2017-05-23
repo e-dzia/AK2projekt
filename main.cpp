@@ -28,11 +28,8 @@ int main()
             X  = new double [n];
             AB = nullptr;
 
-            //std::cout << "Noelo" << std::endl;
             generateNumbers(AB,n,n+1);
             saveToFile("data.txt", AB, n, n + 1);
-
-            //std::cout << "Noelo" << std::endl;
 
             Timer *timer = TimerFactory::createTimer();
             timer->start();
@@ -51,7 +48,7 @@ int main()
 
             fout << n << " " << timeNormal << " " << timeParallel << std::endl;
 
-            for(int k = 0; k < n; k++) delete [] AB[i];
+            for(int k = 0; k < n; k++) delete [] AB[k];
             delete [] AB;
             delete [] X;
         }

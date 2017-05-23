@@ -2,7 +2,6 @@
 #include "Utils.h"
 
 void generateNumbers(double **&arr, const int rows, const int columns) {
-   // std::cout << "Eloszki!\n";
     if (arr != nullptr){
         for (int i = 0; i < rows; i++){
             if (arr[i] != nullptr)
@@ -10,19 +9,17 @@ void generateNumbers(double **&arr, const int rows, const int columns) {
         }
         delete[] arr;
     }
- //  std::cout << "Eloszki2!\n";
+
     arr = new double * [rows];
     for(int i = 0; i < rows; i++)
         arr[i] = new double[columns];
 
-  //  std::cout << "Eloszki3!\n";
     for (int i = 0; i < rows; ++i){
         for (int j = 0; j < columns; ++j){
             arr[i][j] =  double(rand()%100);
         }
     }
 
- //   std::cout << "Eloszki4!\n";
 }
 
 bool saveToFile(const std::string &filename, const double* const* arr, const int rows, const int columns) {
