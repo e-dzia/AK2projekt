@@ -11,6 +11,8 @@ void gaussParallel(int n, double ** AB, double * X);
 
 int main()
 {
+    int numberOfIterations = 50;
+
     double **AB = nullptr;
     double *X = nullptr;
     double timeNormal, timeParallel;
@@ -19,16 +21,16 @@ int main()
     int sizeOfSizes = sizeof(sizes)/sizeof(sizes[0]);
     Timer *timer = TimerFactory::createTimer();
 
-    std::cout << sizeOfSizes << std::endl;
+    //std::cout << sizeOfSizes << std::endl;
 
     std::ofstream fout;
     fout.open("results.txt");
 
     for (i = 0; i < sizeOfSizes; i++) {
         n = sizes[i]; //number of rows
-        std::cout << i << " " << n << " " << sizeOfSizes << std::endl;
-        for (j = 0; j < 10; j++) {
-            std::cout << j << std::endl;
+        //std::cout << i << " " << n << " " << sizeOfSizes << std::endl;
+        for (j = 0; j < numberOfIterations; j++) {
+            //std::cout << j << std::endl;
             X = new double [n];
 
             generateNumbers(AB, n, n + 1);
