@@ -1,19 +1,20 @@
 CXX = /usr/bin/g++
 CXXFLAGS = -Wall -Wextra -pedantic -fopenmp -std=c++11
+SRCDIR = ./src
 OBJDIR = ./obj
 OUTDIR = ./out
 
 $(OUTDIR)/test: $(OBJDIR)/main.o $(OBJDIR)/TimerLinux.o $(OBJDIR)/Utils.o | directories
 	$(CXX) $(CXXFLAGS) $(OBJDIR)/main.o $(OBJDIR)/TimerLinux.o $(OBJDIR)/Utils.o -o $(OUTDIR)/test
 
-$(OBJDIR)/main.o: main.cpp | directories
-	$(CXX) $(CXXFLAGS) main.cpp -c -o $(OBJDIR)/main.o
+$(OBJDIR)/main.o: $(SRCDIR)/main.cpp | directories
+	$(CXX) $(CXXFLAGS) $(SRCDIR)/main.cpp -c -o $(OBJDIR)/main.o
 
-$(OBJDIR)/TimerLinux.o: TimerLinux.cpp | directories
-	$(CXX) $(CXXFLAGS) TimerLinux.cpp -c -o $(OBJDIR)/TimerLinux.o
+$(OBJDIR)/TimerLinux.o: $(SRCDIR)/TimerLinux.cpp | directories
+	$(CXX) $(CXXFLAGS) $(SRCDIR)/TimerLinux.cpp -c -o $(OBJDIR)/TimerLinux.o
 
-$(OBJDIR)/Utils.o: Utils.cpp | directories
-	$(CXX) $(CXXFLAGS) Utils.cpp -c -o $(OBJDIR)/Utils.o
+$(OBJDIR)/Utils.o: $(SRCDIR)/Utils.cpp | directories
+	$(CXX) $(CXXFLAGS) $(SRCDIR)/Utils.cpp -c -o $(OBJDIR)/Utils.o
 
 .PHONY: directories
 directories: $(OBJDIR) $(OUTDIR)
