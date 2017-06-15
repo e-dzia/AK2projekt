@@ -25,6 +25,8 @@ int main()
     std::ofstream fout;
     fout.open("results.txt");
 
+    n = 10;
+
     for (i = 0; i < sizeOfSizes; i++) {
         n = sizes[i]; //number of rows
         for (j = 0; j < numberOfIterations; j++) {
@@ -89,7 +91,7 @@ void gaussParallel(int n, double ** AB, double * X)
     for (j = 0; j < n-1; j++){
         pivot(n, AB, j);
 
-#pragma omp parallel for default(none) shared(n,AB,j) private(i,k,m)
+#pragma omp parallel for default(none) shared(n,AB,j) private(i,k,xFac)
         for (k = j+1; k < n; k++){
             xFac = -AB[k][j]/AB[j][j];
             for (i = j; i < n+1; i++){
@@ -102,7 +104,7 @@ void gaussParallel(int n, double ** AB, double * X)
     for(i = n - 1; i >= 0; i--)
     {
         double s = AB[i][n];
-#pragma omp parallel for default(none) private(j) shared(AB,X,n,i)
+#pragma omp parallel for default(none) private(j) shared(AB,X,n,i,s)
         for(j = n - 1; j >= i + 1; j--){
             s -= AB[i][j] * X[j];
         }
@@ -120,6 +122,7 @@ void pivot(int n, double **AB, int j)
     aMax = fabs(AB[j][j]) ;
     m = j;
     //find the row with largest pivot
+#pragma omp parallel for default(none) shared(n,AB,j,aMax,m) private(xFac,i)
     for (i = j+1; i < n; i++){
         xFac = fabs(AB[i][j]);
         if(xFac > aMax) {
@@ -130,6 +133,7 @@ void pivot(int n, double **AB, int j)
 
     //row interchanges
     if(m != j) {
+#pragma omp parallel for default(none) shared(n,AB,j,m) private(k,tmp)
         for(k = j; k < n+1; k++) {
             tmp = AB[j][k];
             AB[j][k] = AB[m][k];
