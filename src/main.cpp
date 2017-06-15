@@ -8,6 +8,7 @@
 
 void gauss(int n, double ** AB, double * X);
 void gaussParallel(int n, double ** AB, double * X);
+void pivot(int n, double **AB, int j);
 
 int main()
 {
@@ -17,20 +18,16 @@ int main()
     double *X = nullptr;
     double timeNormal, timeParallel;
     int n, i, j, k;
-    int sizes[] = {100,200,500,1000,2000};
+    int sizes[] = {100,200,500,1000};
     int sizeOfSizes = sizeof(sizes)/sizeof(sizes[0]);
     Timer *timer = TimerFactory::createTimer();
-
-    //std::cout << sizeOfSizes << std::endl;
 
     std::ofstream fout;
     fout.open("results.txt");
 
     for (i = 0; i < sizeOfSizes; i++) {
         n = sizes[i]; //number of rows
-        //std::cout << i << " " << n << " " << sizeOfSizes << std::endl;
         for (j = 0; j < numberOfIterations; j++) {
-            //std::cout << j << std::endl;
             X = new double [n];
 
             generateNumbers(AB, n, n + 1);
@@ -61,7 +58,7 @@ int main()
 
 void gauss(int n, double ** AB, double * X)
 {
-    //eliminowanie wspolczynnikow
+    //elimination
     for (int i = 0; i < n-1;  i++){
         for (int j = i+1; j < n; j++){
             double xFac = -AB[j][i]/AB[i][i];
@@ -71,7 +68,7 @@ void gauss(int n, double ** AB, double * X)
         }
     }
 
-    //wyliczanie X
+    //count X
     for(int i = n - 1; i >= 0; i--)
     {
         double s = AB[i][n];
@@ -85,27 +82,58 @@ void gauss(int n, double ** AB, double * X)
 
 void gaussParallel(int n, double ** AB, double * X)
 {
+    double xFac;
     int i, j, k;
-    //eliminowanie wspolczynnikow
-#pragma omp parallel for private(i,j,k) shared(AB,n)
-    for (i = 0; i < n-1;  i++){
-        for (j = i+1; j < n; j++){
-            double xFac = -AB[j][i]/AB[i][i];
-            for (k = i+1; k < n+1; k++){
-                AB[j][k] += xFac*AB[i][k];
+
+    //elimination
+    for (j = 0; j < n-1; j++){
+        pivot(n, AB, j);
+
+#pragma omp parallel for default(none) shared(n,AB,j) private(i,k,m)
+        for (k = j+1; k < n; k++){
+            xFac = -AB[k][j]/AB[j][j];
+            for (i = j; i < n+1; i++){
+                AB[k][i] += xFac * AB[j][i];
             }
         }
     }
 
-    //wyliczanie X
-#pragma omp parallel for private(i,j) shared(AB,X,n)
+    //count X
     for(i = n - 1; i >= 0; i--)
     {
         double s = AB[i][n];
+#pragma omp parallel for default(none) private(j) shared(AB,X,n,i)
         for(j = n - 1; j >= i + 1; j--){
             s -= AB[i][j] * X[j];
         }
         X[i] = s / AB[i][i];
     }
+}
 
+
+void pivot(int n, double **AB, int j)
+{
+
+    int   i, k, m;
+    double xFac, tmp, aMax;
+
+    aMax = fabs(AB[j][j]) ;
+    m = j;
+    //find the row with largest pivot
+    for (i = j+1; i < n; i++){
+        xFac = fabs(AB[i][j]);
+        if(xFac > aMax) {
+            aMax = xFac;
+            m = i;
+        }
+    }
+
+    //row interchanges
+    if(m != j) {
+        for(k = j; k < n+1; k++) {
+            tmp = AB[j][k];
+            AB[j][k] = AB[m][k];
+            AB[m][k] = tmp;
+        }
+    }
 }
